@@ -115,16 +115,13 @@ async function handleChat(request, env) {
 
   let retrieval;
   try {
+    const searchQuery = buildSearchQuery(normalizedMessages);
     retrieval = await env.AI.autorag(env.AI_SEARCH_NAME).search({
-      messages: normalizedMessages.map((message) => ({
-        role: message.role,
-        content: message.content,
-      })),
+      query: searchQuery,
       rewrite_query: true,
-      ai_search_options: {
-        retrieval: {
-          max_num_results: MAX_SEARCH_RESULTS,
-        },
+      max_num_results: MAX_SEARCH_RESULTS,
+      ranking_options: {
+        score_threshold: 0.1,
       },
     });
   } catch (error) {
@@ -351,6 +348,15 @@ function buildGenerationPrompt({ messages, searchResults }) {
     retrievalText,
     "</retrieval>",
   ].join("\n");
+}
+
+function buildSearchQuery(messages) {
+  const recent = messages.slice(-MAX_HISTORY_MESSAGES);
+  const text = recent
+    .map((message) => `${message.role === "assistant" ? "助手" : "用户"}：${message.content}`)
+    .join("\n");
+
+  return text.trim() || "请根据企业库筛选符合要求的医美及消费医疗企业。";
 }
 
 function normalizeSearchResults(response) {
