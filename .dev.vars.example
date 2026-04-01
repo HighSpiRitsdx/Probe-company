@@ -1,0 +1,5 @@
+AI_SEARCH_NAME=dry-leaf-1402
+GEMINI_API_KEY=your-google-ai-api-key
+GEMINI_MODEL=gemini-3-flash-preview
+USE_MOCK_BACKEND=false
+ASSUME_RAG_READY=true

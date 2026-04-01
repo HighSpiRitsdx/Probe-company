@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>探针资本项目库</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell is-empty" id="page-shell">
+      <header class="app-header">
+        <div class="brand-lockup">
+          <div class="brand-logo-wrap">
+            <img
+              class="brand-logo"
+              src="./logo-transparent.png"
+              alt="探针资本 Logo"
+            />
+          </div>
+          <div class="brand-copy">
+            <h1>探针资本项目库</h1>
+          </div>
+        </div>
+        <div class="status-pill" id="status-pill"></div>
+      </header>
+
+      <main class="chat-layout">
+        <section class="message-stack" id="message-stack" aria-live="polite"></section>
+
+        <section class="composer-card">
+          <div class="composer-toolbar">
+            <label class="control-group" aria-label="模型选择">
+              <select id="model-select">
+                <option value="gemini-3-flash-preview">
+                  gemini-3-flash-preview
+                </option>
+              </select>
+            </label>
+          </div>
+
+          <div class="composer-main">
+            <label class="composer-field" for="prompt-input">
+              <textarea
+                id="prompt-input"
+                rows="3"
+                placeholder="继续提问，例如：优先筛选近两年融资、位于苏州、适合硬科技专场路演的企业"
+              ></textarea>
+            </label>
+            <button class="send-button" id="send-button" type="button">
+              发送
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="user-message-template">
+      <article class="message-row user-row">
+        <div class="user-bubble"></div>
+      </article>
+    </template>
+
+    <template id="assistant-list-template">
+      <article class="assistant-panel">
+        <div class="assistant-heading">
+          <h2 class="assistant-title"></h2>
+          <button class="export-button" type="button">导出名单</button>
+        </div>
+        <p class="assistant-summary"></p>
+        <div class="company-list"></div>
+        <p class="assistant-followup"></p>
+      </article>
+    </template>
+
+    <template id="assistant-detail-template">
+      <article class="assistant-panel">
+        <div class="assistant-heading">
+          <h2 class="assistant-title"></h2>
+        </div>
+        <p class="assistant-summary"></p>
+        <div class="detail-block">
+          <div class="detail-section">
+            <h3>判断</h3>
+            <p class="detail-judgement"></p>
+          </div>
+          <div class="detail-section">
+            <h3>建议追问</h3>
+            <ul class="detail-followups"></ul>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

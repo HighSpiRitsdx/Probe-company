@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "probe-companies",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-04-01",
+  "ai": {
+    "binding": "AI",
+    "remote": true
+  },
+  "vars": {
+    "AI_SEARCH_NAME": "dry-leaf-1402",
+    "GEMINI_MODEL": "gemini-3-flash-preview",
+    "USE_MOCK_BACKEND": "false",
+    "ASSUME_RAG_READY": "true"
+  },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  }
+}
