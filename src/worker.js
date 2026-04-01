@@ -115,13 +115,16 @@ async function handleChat(request, env) {
 
   let retrieval;
   try {
-    const searchQuery = buildSearchQuery(normalizedMessages);
     retrieval = await env.AI.autorag(env.AI_SEARCH_NAME).search({
-      query: searchQuery,
-      rewrite_query: true,
-      max_num_results: MAX_SEARCH_RESULTS,
-      ranking_options: {
-        score_threshold: 0.1,
+      messages: normalizedMessages.map((message) => ({
+        role: message.role,
+        content: message.content,
+      })),
+      ai_search_options: {
+        retrieval: {
+          max_num_results: MAX_SEARCH_RESULTS,
+          match_threshold: 0.1,
+        },
       },
     });
   } catch (error) {
