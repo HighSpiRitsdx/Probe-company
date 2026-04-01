@@ -76,7 +76,6 @@ async function handleChat(request, env) {
         companies: mock.companies,
       });
     }
-
     return json({
       ...mock,
       mode: "mock",
@@ -116,15 +115,11 @@ async function handleChat(request, env) {
   let retrieval;
   try {
     retrieval = await env.AI.autorag(env.AI_SEARCH_NAME).search({
-      messages: normalizedMessages.map((message) => ({
-        role: message.role,
-        content: message.content,
-      })),
-      ai_search_options: {
-        retrieval: {
-          max_num_results: MAX_SEARCH_RESULTS,
-          match_threshold: 0.1,
-        },
+      query: buildSearchQuery(normalizedMessages),
+      rewrite_query: true,
+      max_num_results: MAX_SEARCH_RESULTS,
+      ranking_options: {
+        score_threshold: 0.1,
       },
     });
   } catch (error) {
@@ -244,9 +239,7 @@ async function generateJsonWithGemini({ apiKey, model, prompt, systemInstruction
 }
 
 async function enrichCompanyWebsites({ apiKey, model, companies }) {
-  const targets = companies
-    .filter((company) => !company.website)
-    .slice(0, 5);
+  const targets = companies.filter((company) => !company.website).slice(0, 5);
 
   if (targets.length === 0) {
     return companies;
@@ -335,7 +328,7 @@ function buildGenerationPrompt({ messages, searchResults }) {
     "- 只能使用检索结果里能支持的事实。",
     "- reason 必须解释为什么这家企业适合或不适合当前活动主题，而不是复述简介。",
     "- summary 应该先给总体判断，再点出筛选口径。",
-    "- website 只有在检索结果明确给出官网时才可填写，否则必须为 null。官网后续会单独联网补充。",
+    "- website 只有在检索结果明确给出官网时才可填写，否则必须为 null。",
     "- 如果证据不足，要在 summary 或 judgement 中明确说明证据不足。",
     "- historyText 要写成便于后续多轮对话压缩的简洁自然语言摘要。",
     "",
@@ -354,12 +347,13 @@ function buildGenerationPrompt({ messages, searchResults }) {
 }
 
 function buildSearchQuery(messages) {
-  const recent = messages.slice(-MAX_HISTORY_MESSAGES);
-  const text = recent
+  const recentMessages = messages.slice(-MAX_HISTORY_MESSAGES);
+  const query = recentMessages
     .map((message) => `${message.role === "assistant" ? "助手" : "用户"}：${message.content}`)
-    .join("\n");
+    .join("\n")
+    .trim();
 
-  return text.trim() || "请根据企业库筛选符合要求的医美及消费医疗企业。";
+  return query || "请根据企业库筛选符合要求的医美及消费医疗企业。";
 }
 
 function normalizeSearchResults(response) {
