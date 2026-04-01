@@ -228,7 +228,8 @@ async function sendPrompt() {
 
     const payload = await response.json();
     if (!response.ok) {
-      throw new Error(payload.error || "请求失败。");
+      const detail = payload.detail ? `\n${payload.detail}` : "";
+      throw new Error(`${payload.error || "请求失败。"}${detail}`);
     }
 
     state.messages[state.messages.length - 1] = buildAssistantMessage(payload);

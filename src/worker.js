@@ -116,9 +116,16 @@ async function handleChat(request, env) {
   let retrieval;
   try {
     retrieval = await env.AI.autorag(env.AI_SEARCH_NAME).search({
-      query: latestUserMessage.content,
-      max_num_results: MAX_SEARCH_RESULTS,
+      messages: normalizedMessages.map((message) => ({
+        role: message.role,
+        content: message.content,
+      })),
       rewrite_query: true,
+      ai_search_options: {
+        retrieval: {
+          max_num_results: MAX_SEARCH_RESULTS,
+        },
+      },
     });
   } catch (error) {
     return json(
@@ -356,22 +363,47 @@ function normalizeSearchResults(response) {
   return rawItems
     .map((item) => {
       const content =
-        firstString([
-          item?.content,
-          item?.text,
-          item?.chunk,
-          item?.value,
-          item?.data?.content,
-          item?.attributes?.file?.context,
-        ]) || "";
+        extractContentText(
+          item?.content ?? item?.text ?? item?.chunk ?? item?.value ?? item?.data?.content
+        ) ||
+        firstString([item?.attributes?.file?.context]) ||
+        "";
 
       return {
         score: typeof item?.score === "number" ? item.score : null,
         content: content.trim(),
-        metadataText: objectToText(item?.attributes || item?.metadata || item?.data?.attributes || {}),
+        metadataText:
+          objectToText(item?.attributes || item?.metadata || item?.data?.attributes || {}) ||
+          [item?.file_id, item?.filename].filter(Boolean).join("; "),
       };
     })
     .filter((item) => item.content);
+}
+
+function extractContentText(value) {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .map((part) => {
+        if (typeof part === "string") {
+          return part;
+        }
+        if (part && typeof part.text === "string") {
+          return part.text;
+        }
+        if (part && typeof part.content === "string") {
+          return part.content;
+        }
+        return "";
+      })
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return "";
 }
 
 function firstString(values) {
